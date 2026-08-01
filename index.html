@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vasilis Nasopoulos — formal methods &amp; distributed consensus</title>
+    <meta name="description" content="Machine-checked specifications and proofs for Vortex DSE: TLA+, TLC, Apalache, TLAPS and Lean 4.">
+    <link rel="canonical" href="https://vasilisnasopoulos-stack.github.io/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Vasilis Nasopoulos — formal methods &amp; distributed consensus">
+    <meta property="og:description" content="Machine-checked specifications and proofs for Vortex DSE: TLA+, TLC, Apalache, TLAPS and Lean 4.">
+    <meta property="og:url" content="https://vasilisnasopoulos-stack.github.io/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Vasilis Nasopoulos — formal methods &amp; distributed consensus">
+    <meta name="twitter:description" content="Machine-checked specifications and proofs for Vortex DSE.">
+
+    <style>
+      :root {
+        color-scheme: dark light;
+        --bg: #0b1020; --panel: #131a33; --text: #eef1fb; --muted: #a9b4d4;
+        --accent: #8ab4ff; --border: #29335c; --ok: #6ee7a8;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fbfcff; --panel: #ffffff; --text: #121a30; --muted: #4c5878;
+          --accent: #1a56c4; --border: #dbe2f2; --ok: #157a4a;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text);
+        font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      }
+      main { max-width: 900px; margin: 0 auto; padding: 52px 20px 72px; }
+      h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.02em; }
+      h2 { font-size: 1.2rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+      p, li { color: var(--muted); }
+      a { color: var(--accent); }
+      .eyebrow { text-transform: uppercase; letter-spacing: .09em; font-size: .76rem; color: var(--muted); margin: 0; }
+      .lede { font-size: 1.05rem; max-width: 62ch; }
+      section { margin-top: 42px; }
+      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+      .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+      .badges img { display: block; height: 20px; }
+      .stats { display: grid; gap: 14px; margin-top: 26px; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+      .stat { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; background: var(--panel); }
+      .stat b { display: block; font-size: 1.45rem; color: var(--text); letter-spacing: -.02em; }
+      .stat span { font-size: .85rem; color: var(--muted); }
+      .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(228px, 1fr)); margin-top: 18px; }
+      .card {
+        display: block; padding: 18px; border-radius: 14px; border: 1px solid var(--border);
+        background: var(--panel); text-decoration: none; color: inherit;
+      }
+      .card:hover { border-color: var(--accent); }
+      .card strong { color: var(--text); }
+      .card p { margin: 6px 0 0; font-size: .92rem; }
+      ul.plain { list-style: none; padding: 0; margin: 14px 0 0; }
+      ul.plain li { padding: 11px 0; border-top: 1px solid var(--border); font-size: .95rem; }
+      ul.plain li:first-child { border-top: 0; }
+      .tick { color: var(--ok); font-weight: 600; }
+      footer { margin-top: 54px; padding-top: 22px; border-top: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Formal methods · TLA⁺ · TLAPS · distributed consensus</p>
+        <h1>Vasilis Nasopoulos</h1>
+        <p class="lede">
+          I work on <strong>Vortex DSE</strong>, a deterministic consensus protocol that reaches
+          finality without leader election, voting, or gossip. The specifications and safety
+          proofs below are public and machine-checked; the engine itself is not.
+        </p>
+
+        <div class="badges">
+          <a href="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-proofs.yml"><img alt="TLAPS proofs" src="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-proofs.yml/badge.svg"></a>
+          <a href="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-tlc.yml"><img alt="TLC models" src="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-tlc.yml/badge.svg"></a>
+          <a href="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-apalache.yml"><img alt="Apalache models" src="https://github.com/vasilisnasopoulos-stack/vasilisnasopoulos-stack/actions/workflows/verify-apalache.yml/badge.svg"></a>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><b>325</b><span>TLAPS obligations discharged</span></div>
+          <div class="stat"><b>2×RTT</b><span>latency bound, no coordination</span></div>
+          <div class="stat"><b>13 / 13</b><span>nodes / countries, one state hash</span></div>
+        </div>
+      </header>
+
+      <section>
+        <h2>Where to start</h2>
+        <p>Three entry points, in increasing depth.</p>
+        <div class="grid">
+          <a class="card" href="https://github.com/vasilisnasopoulos-stack/vortex-dse-whitepaper">
+            <strong>1 · Whitepaper</strong>
+            <p>Motivation, terminology, and what the protocol does and does not claim. Includes a runnable toy demo.</p>
+          </a>
+          <a class="card" href="https://github.com/vasilisnasopoulos-stack/vortex-dse-cslot-spec">
+            <strong>2 · Executable specification</strong>
+            <p>The strict admission model in TLA⁺, with reference scenarios and TLC configurations.</p>
+          </a>
+          <a class="card" href="https://github.com/vasilisnasopoulos-stack/vortex-dse-cslot-proofs">
+            <strong>3 · Machine-checked proofs</strong>
+            <p>TLAPS deductive proofs of admission safety. CI fails the build if any obligation is left unproved.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>What is actually proved</h2>
+        <p>
+          Bounded model checking and deductive proof are different guarantees, so the
+          distinction is kept explicit rather than collapsed into one number.
+        </p>
+        <ul class="plain">
+          <li><span class="tick">✓</span> <strong>Exactly-once admission</strong> — 131 obligations, TLAPS, unbounded.</li>
+          <li><span class="tick">✓</span> <strong>Type safety &amp; no-future admission</strong> — 194 obligations, TLAPS, unbounded.</li>
+          <li><span class="tick">✓</span> <strong>Per-slot agreement</strong> — TLC and Apalache, two independent checkers, bounded; plus a Lean 4 inductive proof.</li>
+          <li><span class="tick">✓</span> <strong>Bounded latency</strong> — proved for the core, with two diameter-induction steps left explicitly <code>OMITTED</code> rather than silently open.</li>
+        </ul>
+      </section>
+
+      <section class="panel">
+        <h2>Upstream contributions</h2>
+        <p>Work that came out of using these tools in anger, contributed back to the TLA⁺ project.</p>
+        <ul class="plain">
+          <li><a href="https://github.com/tlaplus/tlapm/issues/287">tlapm#287</a> — <code>tlapm</code> exits 0 when proof obligations fail, so CI can report success over a proof that never closed.</li>
+          <li><a href="https://github.com/tlaplus/tlapm/pull/288">tlapm#288</a> <span class="tick">merged</span> — aligned the TLAPS download pages with the current builds.</li>
+          <li><a href="https://github.com/tlaplus/CommunityModules/pull/128">CommunityModules#128</a> <span class="tick">merged</span> — proof verification in CI now fails when a proof breaks.</li>
+        </ul>
+      </section>
+
+      <footer>
+        <p>
+          Public artifacts are Apache-2.0; the whitepaper is CC BY-NC-ND 4.0.
+          The production engine and the underlying derivations remain proprietary.
+        </p>
+        <p>
+          <a href="https://github.com/vasilisnasopoulos-stack">GitHub</a> ·
+          <a href="mailto:vasilis_nasopoulos@hotmail.com">vasilis_nasopoulos@hotmail.com</a>
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
