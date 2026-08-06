@@ -1,0 +1,14 @@
+{
+  "generated": "2026-08-06T16:43:58Z",
+  "nodes": 3,
+  "regions": ["Frankfurt", "Tokyo", "Los Angeles"],
+  "slot": 0,
+  "received": 0,
+  "admitted": 0,
+  "audit_ok": 0,
+  "audit_mismatch": 0,
+  "witnesses": 0,
+  "cadence_slots": 14,
+  "uptime_seconds": 716,
+  "mempool": {"depth":0,"pushed":1460,"pulled":1460,"dropped":0,"drainer":"healthy","failovers":0}
+}
