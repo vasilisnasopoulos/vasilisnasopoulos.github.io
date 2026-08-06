@@ -1,14 +1,14 @@
 {
-  "generated": "2026-08-06T16:43:58Z",
+  "generated": "2026-08-06T16:47:15Z",
   "nodes": 3,
   "regions": ["Frankfurt", "Tokyo", "Los Angeles"],
-  "slot": 0,
-  "received": 0,
-  "admitted": 0,
-  "audit_ok": 0,
+  "slot": 6,
+  "received": 280,
+  "admitted": 278,
+  "audit_ok": 12,
   "audit_mismatch": 0,
-  "witnesses": 0,
-  "cadence_slots": 14,
-  "uptime_seconds": 716,
-  "mempool": {"depth":0,"pushed":1460,"pulled":1460,"dropped":0,"drainer":"healthy","failovers":0}
+  "witnesses": 2,
+  "cadence_slots": 8,
+  "uptime_seconds": 913,
+  "mempool": {"depth":0,"pushed":1320,"pulled":1320,"dropped":0,"drainer":"healthy","failovers":0}
 }
