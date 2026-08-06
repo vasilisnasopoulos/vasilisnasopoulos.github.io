@@ -60,6 +60,16 @@
       ul.plain li:first-child { border-top: 0; }
       .tick { color: var(--ok); font-weight: 600; }
       footer { margin-top: 54px; padding-top: 22px; border-top: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
+      .live { margin-top: 42px; }
+      .live-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: inline-block; }
+      .dot.stale { background: #d0a215; }
+      .dot.off { background: #c2564f; }
+      .live-meta { font-size: .82rem; color: var(--muted); }
+      .live-grid { display: grid; gap: 12px; margin-top: 16px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+      .live-cell { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--panel); }
+      .live-cell b { display: block; font-size: 1.3rem; color: var(--text); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+      .live-cell span { font-size: .8rem; color: var(--muted); }
       code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
     </style>
   </head>
@@ -120,6 +130,22 @@
         </ul>
       </section>
 
+
+      <section class="live">
+        <div class="live-head">
+          <h2><span class="dot" id="lv-dot"></span> Testnet</h2>
+          <span class="live-meta" id="lv-meta">loading…</span>
+        </div>
+        <p>
+          Three nodes in Frankfurt, Tokyo and Los Angeles, running continuously.
+          Every slot each node commits a state hash and a rotor auditor broadcasts
+          its own for the others to check against. The counters below are what those
+          nodes report; nothing here is hand-entered.
+        </p>
+        <div class="live-grid" id="lv-grid"></div>
+        <p class="live-meta" id="lv-note"></p>
+      </section>
+
       <footer>
         <p>
           Public artifacts are Apache-2.0; the whitepaper is CC BY-NC-ND 4.0.
@@ -131,5 +157,48 @@
         </p>
       </footer>
     </main>
+
+    <script>
+      (async function () {
+        const dot  = document.getElementById('lv-dot');
+        const meta = document.getElementById('lv-meta');
+        const grid = document.getElementById('lv-grid');
+        const note = document.getElementById('lv-note');
+        const cell = (v, l) => `<div class="live-cell"><b>${v}</b><span>${l}</span></div>`;
+        const num  = n => Number(n).toLocaleString('en-US');
+
+        try {
+          const r = await fetch('testnet.json?t=' + Date.now(), { cache: 'no-store' });
+          if (!r.ok) throw new Error(r.status);
+          const d = await r.json();
+
+          const ageMin = Math.round((Date.now() - Date.parse(d.generated)) / 60000);
+          dot.className = 'dot' + (ageMin > 20 ? ' off' : ageMin > 10 ? ' stale' : '');
+          meta.textContent = ageMin < 1 ? 'updated just now'
+                           : `updated ${ageMin} minute${ageMin === 1 ? '' : 's'} ago`;
+
+          const up = d.uptime_seconds || 0;
+          const upTxt = up >= 86400 ? Math.floor(up / 86400) + 'd ' + Math.floor(up % 86400 / 3600) + 'h'
+                      : up >= 3600  ? Math.floor(up / 3600) + 'h ' + Math.floor(up % 3600 / 60) + 'm'
+                      : Math.floor(up / 60) + 'm';
+
+          grid.innerHTML =
+              cell(d.nodes, 'nodes, ' + (d.regions || []).length + ' continents')
+            + cell(num(d.slot), 'slots committed')
+            + cell(num(d.admitted), 'transactions admitted')
+            + cell(d.witnesses + ' / ' + (d.nodes - 1), 'peers witnessed per slot')
+            + cell(num(d.audit_mismatch), 'audit mismatches')
+            + cell(upTxt, 'uptime');
+
+          note.textContent = (d.regions || []).join(' · ')
+            + '. A mismatch count above zero means two nodes disagreed on a slot hash — '
+            + 'the number is reported whether it is zero or not.';
+        } catch (e) {
+          dot.className = 'dot off';
+          meta.textContent = 'status unavailable';
+          note.textContent = 'The published snapshot could not be read. The testnet may be down, or the publisher may have stopped.';
+        }
+      })();
+    </script>
   </body>
 </html>
