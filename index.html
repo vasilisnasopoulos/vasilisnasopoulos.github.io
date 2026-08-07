@@ -137,10 +137,20 @@
           <span class="live-meta" id="lv-meta">loading…</span>
         </div>
         <p>
-          Three nodes in Frankfurt, Tokyo and Los Angeles, running continuously.
-          Every slot each node commits a state hash and a rotor auditor broadcasts
-          its own for the others to check against. The counters below are what those
-          nodes report; nothing here is hand-entered.
+          Three nodes in Frankfurt, Tokyo and Los Angeles running the V5.2
+          edge-ingress build continuously. Each slot every node commits a state
+          hash, and a rotor auditor broadcasts its own for the others to check
+          against. The counters below are what those nodes report; nothing here
+          is hand-entered, and the mismatch count is shown whether it is zero or
+          not.
+        </p>
+        <p class="live-meta">
+          This build is a production candidate, not the engine the published
+          results were measured on. Those come from bounded runs of the core:
+          the most recent, on these same three machines, converged on chain hash
+          <code>c756379c16c8d977</code> — byte-identical to the single-machine
+          reference, with no shared clock and 241&nbsp;ms between the furthest
+          pair.
         </p>
         <div class="live-grid" id="lv-grid"></div>
         <p class="live-meta" id="lv-note"></p>
