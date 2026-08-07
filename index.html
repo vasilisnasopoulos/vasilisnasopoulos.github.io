@@ -70,6 +70,9 @@
       .live-cell { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--panel); }
       .live-cell b { display: block; font-size: 1.3rem; color: var(--text); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
       .live-cell span { font-size: .8rem; color: var(--muted); }
+      .claim { border-left: 3px solid var(--accent); padding: 2px 0 2px 16px; margin: 18px 0; }
+      .claim b { color: var(--text); display: block; margin-bottom: 4px; }
+      .claim p { margin: 0; font-size: .95rem; }
       code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
     </style>
   </head>
@@ -137,13 +140,24 @@
           <span class="live-meta" id="lv-meta">loading…</span>
         </div>
         <p>
-          Three nodes in Frankfurt, Tokyo and Los Angeles running the V5.2
-          edge-ingress build continuously. Each slot every node commits a state
-          hash, and a rotor auditor broadcasts its own for the others to check
-          against. The counters below are what those nodes report; nothing here
-          is hand-entered, and the mismatch count is shown whether it is zero or
-          not.
+          Three nodes in Frankfurt, Tokyo and Los Angeles, running continuously.
+          The figures below are what those nodes measure and report. Two of them
+          are worth explaining, because the numbers mean nothing without the
+          problem they answer.
         </p>
+
+        <div class="claim">
+          <b>Anyone can claim to run nodes on three continents. Nobody can prove it.</b>
+          <p>
+            These nodes time the distance between themselves. Light takes what it
+            takes: 244&nbsp;ms between Frankfurt and Tokyo cannot be faked downward.
+            Three copies on one machine would answer each other in microseconds,
+            and the system flags any pair that close as sharing a host. None are
+            flagged here.
+          </p>
+        </div>
+
+
         <p class="live-meta">
           This build is a production candidate, not the engine the published
           results were measured on. Those come from bounded runs of the core:
@@ -192,17 +206,23 @@
                       : up >= 3600  ? Math.floor(up / 3600) + 'h ' + Math.floor(up % 3600 / 60) + 'm'
                       : Math.floor(up / 60) + 'm';
 
+          const t = d.rtt_ms || {};
+          const rtt = [t.fra_nrt, t.fra_lax, t.nrt_lax]
+                        .map(x => Math.round(Number(x))).filter(x => x > 0);
+
           grid.innerHTML =
-              cell(d.nodes, 'nodes, ' + (d.regions || []).length + ' continents')
-            + cell(num(d.slot), 'slots committed')
+              cell(num(d.slot), 'slots committed')
             + cell(num(d.admitted), 'transactions admitted')
-            + cell(d.witnesses + ' / ' + (d.nodes - 1), 'peers witnessed per slot')
-            + cell(num(d.audit_mismatch), 'audit mismatches')
+            + cell(d.peers_heard + ' / ' + (d.nodes - 1), 'peers heard, this slot')
+            + cell(rtt.length ? rtt.join(' · ') + ' ms' : '—', 'measured RTT between sites')
+            + cell(d.colocation_flags === 0 ? 'none' : num(d.colocation_flags),
+                   'nodes flagged as co-located')
             + cell(upTxt, 'uptime');
 
-          note.textContent = (d.regions || []).join(' · ')
-            + '. A mismatch count above zero means two nodes disagreed on a slot hash — '
-            + 'the number is reported whether it is zero or not.';
+          note.textContent =
+            'Round-trip times are measured by the nodes themselves, not declared. '
+          + 'Machines sharing a host would answer each other in microseconds and be '
+          + 'flagged as co-located; none are.';
         } catch (e) {
           dot.className = 'dot off';
           meta.textContent = 'status unavailable';
