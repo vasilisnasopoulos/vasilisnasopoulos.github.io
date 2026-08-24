@@ -88,15 +88,16 @@
         <p class="eyebrow">Vortex DSE · interactive demonstration</p>
         <h1>Order without a clock</h1>
         <p class="lede">
-          Three machines. Two writes to the same key, issued at genuinely the same instant.
-          Which one survives — and should the answer depend on whose clock is wrong?
+          Three people book the same airline seat at genuinely the same instant, from three
+          machines. One of them gets it. Should which one depend on whose clock is wrong?
         </p>
       </header>
 
       <section>
         <h2>The clocks</h2>
         <div class="clocks" id="clocks"></div>
-        <p class="drag-hint">Drag any clock away from true time. <strong>Watch which side changes its answer.</strong></p>
+        <p class="drag-hint">Every clock starts correct, and both sides agree. Drag any one of
+        them. <strong>Watch which side changes its answer.</strong></p>
 
         <div class="cols">
 
@@ -172,10 +173,13 @@
 (() => {
   "use strict";
 
-  // Two writes to the same key, issued at the same true instant.
+  // Three writes to the same key, issued at the same true instant.
+  // `rank` is only an illustrative stand-in for a generated order — see the
+  // note in the page body. What matters is that byCounting() never reads a clock.
   const WRITES = [
-    { id: "A", node: 0, value: "seat 14A → Ada",   rank: 1 },
-    { id: "B", node: 2, value: "seat 14A → Grace", rank: 0 }
+    { id: "A", node: 0, value: "seat 14A → Ada",   rank: 2 },
+    { id: "B", node: 2, value: "seat 14A → Grace", rank: 1 },
+    { id: "C", node: 1, value: "seat 14A → Kenji", rank: 0 }
   ];
 
   const NODES = [
@@ -251,13 +255,14 @@
     if (previousWinner !== null && previousWinner !== lww.winner.id) flips++;
     previousWinner = lww.winner.id;
 
-    const loser = lww.rows.find(w => w.id !== lww.winner.id);
+    const losers = lww.rows.filter(w => w.id !== lww.winner.id)
+                           .map(w => w.value.replace("seat 14A → ", ""));
     $("lww-verdict").innerHTML =
-      '<strong>' + loser.value + '</strong> was discarded because <strong>' +
-      NODES[lww.winner.node].name + '</strong>’s clock read later — not because it ' +
-      'happened later.' +
+      '<strong>' + losers.join("</strong> and <strong>") + '</strong> lost the seat ' +
+      'because <strong>' + NODES[lww.winner.node].name + '</strong>’s clock read ' +
+      'latest — not because it happened latest.' +
       (flips > 0
-        ? ' The surviving write has changed <span class="flips">' + flips + '</span> time' +
+        ? ' The surviving booking has changed <span class="flips">' + flips + '</span> time' +
           (flips === 1 ? '' : 's') + ' since you started dragging.'
         : '');
 
