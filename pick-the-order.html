@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pick the order — Vortex DSE</title>
+    <meta name="description" content="An open challenge: choose the arrival order of 3,000 transactions. Any permutation you like. The ledger hash will be the same one.">
+    <link rel="canonical" href="https://vasilisnasopoulos.github.io/pick-the-order.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Pick the order">
+    <meta property="og:description" content="Choose any arrival order for 3,000 transactions. The ledger hash comes out the same. Pick a number and test it.">
+    <meta property="og:url" content="https://vasilisnasopoulos.github.io/pick-the-order.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Pick the order">
+    <meta name="twitter:description" content="Choose any arrival order for 3,000 transactions. The ledger hash comes out the same.">
+
+    <style>
+      :root {
+        color-scheme: dark light;
+        --bg: #0b1020; --panel: #131a33; --text: #eef1fb; --muted: #a9b4d4;
+        --accent: #8ab4ff; --border: #29335c; --ok: #6ee7a8;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fbfcff; --panel: #ffffff; --text: #121a30; --muted: #4c5878;
+          --accent: #1a56c4; --border: #dbe2f2; --ok: #157a4a;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text);
+        font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      }
+      main { max-width: 900px; margin: 0 auto; padding: 52px 20px 72px; }
+      h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.02em; }
+      h2 { font-size: 1.2rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+      p, li { color: var(--muted); }
+      a { color: var(--accent); }
+      .eyebrow { text-transform: uppercase; letter-spacing: .09em; font-size: .76rem; color: var(--muted); margin: 0; }
+      .lede { font-size: 1.05rem; max-width: 62ch; }
+      section { margin-top: 42px; }
+      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+      code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+      footer { margin-top: 54px; padding-top: 22px; border-top: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
+
+      .bet { border-left: 3px solid var(--accent); padding: 4px 0 4px 18px; margin: 26px 0 0; }
+      .bet p { font-size: 1.08rem; color: var(--text); margin: 0 0 8px; }
+      .bet p:last-child { margin-bottom: 0; }
+
+      table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 16px; }
+      th { text-align: left; font-weight: 500; color: var(--muted); font-size: .74rem;
+           text-transform: uppercase; letter-spacing: .07em; padding: 0 0 10px; }
+      td { padding: 10px 0; border-top: 1px solid var(--border); color: var(--muted); }
+      td.hash { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
+      td.inv { color: var(--ok); font-weight: 600; white-space: nowrap; }
+      .same { margin-top: 16px; font-size: .92rem; }
+      .same b { color: var(--text); }
+
+      ol.steps { margin: 16px 0 0; padding-left: 20px; }
+      ol.steps li { padding: 5px 0; }
+      .cta { display: inline-block; margin-top: 18px; padding: 11px 18px; border-radius: 12px;
+             border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-size: .95rem; }
+      .cta:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+      .fine { font-size: .88rem; border-left: 3px solid var(--border); padding: 2px 0 2px 16px; margin-top: 24px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Vortex DSE · open challenge</p>
+        <h1>Pick the order</h1>
+        <p class="lede">
+          The first thing you learn about distributed systems is that the order messages arrive in
+          determines the state you end up with. It is the reason consensus protocols exist at all.
+        </p>
+
+        <div class="bet">
+          <p>So: <strong>you choose the order.</strong></p>
+          <p>Three thousand transactions, five nodes. Name any permutation you like — reversed,
+          random, a different one per node. I will run it and publish the ledger hash.</p>
+          <p>It will be the same hash. It is always the same hash.</p>
+        </div>
+      </header>
+
+      <section>
+        <h2>Runs so far</h2>
+        <p>3,000 transactions, 5 nodes, identical input set, different arrival order each time.</p>
+        <table>
+          <thead><tr><th>Arrival order</th><th>Ledger hash</th><th>Invariants</th></tr></thead>
+          <tbody>
+            <tr><td>canonical</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+            <tr><td>shuffled, seed 42</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+            <tr><td>shuffled, seed 999</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+            <tr><td>shuffled, seed 777</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+            <tr><td>shuffled, seed 123456</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+            <tr><td>shuffled, seed 31337</td><td class="hash">88c18c89d2d6b43a</td><td class="inv">14 / 14</td></tr>
+          </tbody>
+        </table>
+        <p class="same">
+          <b>Same set in, same ledger out</b> — with no sequencer, no quorum, and no node asking
+          another node what order to use. The permutation is a Fisher–Yates shuffle of the send
+          order; the set of transactions is untouched.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Send me a number</h2>
+        <p>
+          Pick any integer. It seeds the permutation, so you are choosing an arrival order that
+          nobody — including me — has run before.
+        </p>
+        <ol class="steps">
+          <li>Open an issue with your number in the title.</li>
+          <li>I run <code>--shuffle-seed &lt;your number&gt;</code> against the same 3,000-transaction set.</li>
+          <li>I post the resulting hash and the invariant count in the thread.</li>
+        </ol>
+        <a class="cta" href="https://github.com/vasilisnasopoulos/pick-the-order/issues/new?title=seed%20&amp;body=Pick%20any%20integer%20and%20put%20it%20in%20the%20title.%0A%0AOptional%3A%20say%20what%20you%20expect%20to%20happen.">Open an issue with your number →</a>
+        <p class="fine">
+          Every run is posted whatever it says. If a seed ever produces a different hash, that
+          result goes up too — a challenge you only publish when you win is not a challenge.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why this is the interesting part</h2>
+        <p>
+          Ordering is normally something a system has to <em>agree</em> on: elect a leader to
+          assign sequence numbers, or run a quorum round per operation, or stamp everything with a
+          clock and hope the clocks are close. All of that exists because arrival order would
+          otherwise decide the outcome.
+        </p>
+        <p>
+          If the final state is a function of the <em>set</em> of transactions rather than the
+          order they showed up in, that whole problem stops applying. Nothing has to be agreed,
+          because there is nothing left to disagree about.
+        </p>
+        <p>
+          A related demonstration you can run yourself, with no numbers to send anyone:
+          <a href="/order-without-a-clock.html">order without a clock →</a>
+        </p>
+      </section>
+
+      <footer>
+        Vortex DSE — deterministic ordering, machine-checked exactly-once (TLA⁺/TLAPS),
+        measured at the 2×RTT floor across 13 countries.
+        <a href="/">Proofs, specification and live testnet →</a>
+      </footer>
+    </main>
+  </body>
+</html>
