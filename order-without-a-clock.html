@@ -1,157 +1,172 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Order without a clock</title>
-<style>
-  :root{
-    --bg:#fbfbfa; --fg:#1a1a19; --dim:#6b6b66; --line:#dcdcd6;
-    --panel:#fff; --bad:#b03024; --good:#1f6f4a; --accent:#2b4d8c;
-    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
-  }
-  @media (prefers-color-scheme:dark){
-    :root{
-      --bg:#141414; --fg:#e8e8e4; --dim:#94948c; --line:#2e2e2c;
-      --panel:#1b1b1a; --bad:#e0705f; --good:#5fbf8f; --accent:#7fa5e0;
-    }
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; padding:2.5rem 1.25rem 4rem; background:var(--bg); color:var(--fg);
-    font:15px/1.65 var(--mono); -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:940px;margin:0 auto}
-  h1{font-size:1.5rem;font-weight:600;letter-spacing:-.01em;margin:0 0 .5rem}
-  h2{font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;
-     color:var(--dim);margin:0 0 .75rem}
-  p{margin:0 0 1rem;max-width:68ch}
-  .lede{color:var(--dim);margin-bottom:2rem}
-  .rule{height:1px;background:var(--line);margin:2.5rem 0;border:0}
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Order without a clock — Vortex DSE</title>
+    <meta name="description" content="An interactive demonstration: why last-write-wins loses data silently when clocks disagree, and what ordering without a clock looks like instead.">
+    <link rel="canonical" href="https://vasilisnasopoulos.github.io/order-without-a-clock.html">
 
-  /* clocks */
-  .clocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:.5rem}
-  .clock{border:1px solid var(--line);background:var(--panel);padding:.9rem 1rem;border-radius:3px}
-  .clock .name{font-weight:600;font-size:.85rem}
-  .clock .skew{color:var(--dim);font-size:.78rem;margin:.15rem 0 .6rem;font-variant-numeric:tabular-nums}
-  input[type=range]{width:100%;accent-color:var(--accent);cursor:grab}
-  input[type=range]:active{cursor:grabbing}
-  .hint{color:var(--dim);font-size:.8rem;margin:.9rem 0 0}
-  .hint b{color:var(--fg);font-weight:600}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Order without a clock">
+    <meta property="og:description" content="Drag the clocks. One side changes its answer; the other cannot.">
+    <meta property="og:url" content="https://vasilisnasopoulos.github.io/order-without-a-clock.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Order without a clock">
+    <meta name="twitter:description" content="Drag the clocks. One side changes its answer; the other cannot.">
 
-  /* panels */
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-top:1.5rem}
-  @media(max-width:760px){.cols{grid-template-columns:1fr}}
-  .panel{border:1px solid var(--line);background:var(--panel);border-radius:3px;overflow:hidden;
-         display:flex;flex-direction:column}
-  .panel header{padding:.85rem 1rem;border-bottom:1px solid var(--line)}
-  .panel h3{margin:0;font-size:.92rem;font-weight:600}
-  .panel .sub{margin:.2rem 0 0;font-size:.78rem;color:var(--dim)}
-  .body{padding:1rem;flex:1}
+    <style>
+      :root {
+        color-scheme: dark light;
+        --bg: #0b1020; --panel: #131a33; --text: #eef1fb; --muted: #a9b4d4;
+        --accent: #8ab4ff; --border: #29335c; --ok: #6ee7a8; --bad: #f08a80;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #fbfcff; --panel: #ffffff; --text: #121a30; --muted: #4c5878;
+          --accent: #1a56c4; --border: #dbe2f2; --ok: #157a4a; --bad: #b3352a;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--text);
+        font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      }
+      main { max-width: 900px; margin: 0 auto; padding: 52px 20px 72px; }
+      h1 { font-size: clamp(1.9rem, 4vw, 2.5rem); line-height: 1.15; margin: 8px 0 14px; letter-spacing: -0.02em; }
+      h2 { font-size: 1.2rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+      h3 { font-size: 1.02rem; margin: 0; letter-spacing: -0.01em; }
+      p, li { color: var(--muted); }
+      a { color: var(--accent); }
+      .eyebrow { text-transform: uppercase; letter-spacing: .09em; font-size: .76rem; color: var(--muted); margin: 0; }
+      .lede { font-size: 1.05rem; max-width: 62ch; }
+      section { margin-top: 42px; }
+      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .92em; }
+      footer { margin-top: 54px; padding-top: 22px; border-top: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
 
-  table{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums}
-  th{text-align:left;font-weight:500;color:var(--dim);padding:0 0 .45rem;font-size:.75rem;
-     text-transform:uppercase;letter-spacing:.06em}
-  td{padding:.3rem 0;border-top:1px solid var(--line)}
-  td.n{color:var(--dim)}
-  .win{color:var(--good);font-weight:600}
-  .lost{color:var(--bad)}
-  .strike{text-decoration:line-through;opacity:.55}
+      /* clocks */
+      .clocks { display: grid; gap: 12px; margin-top: 18px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+      .clock { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; background: var(--panel); }
+      .clock .name { color: var(--text); font-weight: 600; font-size: .95rem; }
+      .clock .skew { font-size: .82rem; color: var(--muted); margin: 2px 0 12px; font-variant-numeric: tabular-nums; }
+      input[type=range] { width: 100%; accent-color: var(--accent); cursor: grab; }
+      input[type=range]:active { cursor: grabbing; }
+      .drag-hint { margin: 16px 0 0; font-size: .95rem; }
+      .drag-hint strong { color: var(--text); }
 
-  .verdict{margin-top:1rem;padding:.75rem .85rem;border-radius:3px;font-size:.83rem;line-height:1.5}
-  .verdict.bad{background:color-mix(in srgb,var(--bad) 11%,transparent);
-               border-left:2px solid var(--bad)}
-  .verdict.good{background:color-mix(in srgb,var(--good) 11%,transparent);
-                border-left:2px solid var(--good)}
-  .verdict b{font-weight:600}
+      /* the two sides */
+      .cols { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin-top: 18px; }
+      @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+      .side { border: 1px solid var(--border); border-radius: 16px; background: var(--panel); overflow: hidden; }
+      .side > .head { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+      .side > .head p { margin: 6px 0 0; font-size: .88rem; }
+      .side > .inner { padding: 18px 20px 20px; }
 
-  .agree{font-size:.8rem;color:var(--dim);margin-top:.75rem}
-  .agree .same{color:var(--good)}
-  .agree .diff{color:var(--bad)}
+      table { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+      th { text-align: left; font-weight: 500; color: var(--muted); font-size: .74rem;
+           text-transform: uppercase; letter-spacing: .07em; padding: 0 0 8px; }
+      td { padding: 9px 0; border-top: 1px solid var(--border); color: var(--muted); }
+      td .k { color: var(--text); font-weight: 600; }
+      .kept { color: var(--ok); font-weight: 600; }
+      .gone { color: var(--bad); text-decoration: line-through; }
 
-  .counter{display:inline-block;min-width:1.5em;font-weight:600}
-  footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
-         font-size:.8rem;color:var(--dim)}
-  footer a{color:var(--accent)}
-  .note{font-size:.78rem;color:var(--dim);border-left:2px solid var(--line);
-        padding-left:.85rem;margin-top:1.25rem}
-</style>
-</head>
-<body>
-<div class="wrap">
+      .verdict { margin-top: 16px; border-left: 3px solid var(--border); padding: 2px 0 2px 16px; font-size: .92rem; }
+      .verdict.is-bad { border-left-color: var(--bad); }
+      .verdict.is-ok { border-left-color: var(--ok); }
+      .verdict strong { color: var(--text); }
+      .agree { margin-top: 14px; font-size: .84rem; color: var(--muted); }
+      .agree b { color: var(--text); font-weight: 600; }
+      .flips { color: var(--bad); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-  <h1>Order without a clock</h1>
-  <p class="lede">Three machines. Two writes to the same key, at genuinely the same moment.
-  Which one wins &mdash; and does the answer depend on whose clock is wrong?</p>
-
-  <h2>The clocks</h2>
-  <div class="clocks" id="clocks"></div>
-  <p class="hint">Drag any clock off true time. <b>Watch which side changes its answer.</b></p>
-
-  <div class="cols">
-
-    <section class="panel">
+      .note { font-size: .88rem; border-left: 3px solid var(--border); padding: 2px 0 2px 16px; margin-top: 26px; }
+    </style>
+  </head>
+  <body>
+    <main>
       <header>
-        <h3>Ordered by wall clock</h3>
-        <p class="sub">Each write is stamped with the writer's own clock. Highest stamp wins.</p>
+        <p class="eyebrow">Vortex DSE · interactive demonstration</p>
+        <h1>Order without a clock</h1>
+        <p class="lede">
+          Three machines. Two writes to the same key, issued at genuinely the same instant.
+          Which one survives — and should the answer depend on whose clock is wrong?
+        </p>
       </header>
-      <div class="body">
-        <table>
-          <thead><tr><th>Write</th><th>Stamped</th><th>Outcome</th></tr></thead>
-          <tbody id="lww-rows"></tbody>
-        </table>
-        <div class="verdict bad" id="lww-verdict"></div>
-        <div class="agree" id="lww-agree"></div>
-      </div>
-    </section>
 
-    <section class="panel">
-      <header>
-        <h3>Ordered by counting</h3>
-        <p class="sub">No clock is read. Each node derives the order from the write itself.</p>
-      </header>
-      <div class="body">
-        <table>
-          <thead><tr><th>Write</th><th>Stamped</th><th>Outcome</th></tr></thead>
-          <tbody id="dse-rows"></tbody>
-        </table>
-        <div class="verdict good" id="dse-verdict"></div>
-        <div class="agree" id="dse-agree"></div>
-      </div>
-    </section>
+      <section>
+        <h2>The clocks</h2>
+        <div class="clocks" id="clocks"></div>
+        <p class="drag-hint">Drag any clock away from true time. <strong>Watch which side changes its answer.</strong></p>
 
-  </div>
+        <div class="cols">
 
-  <p class="note">
-    This page illustrates a <em>property</em>, not a mechanism: that the winner can be made
-    independent of every clock in the system. The derivation the engine actually uses is not
-    shown here.
-  </p>
+          <div class="side">
+            <div class="head">
+              <h3>Ordered by wall clock</h3>
+              <p>Each write carries the timestamp its own machine produced. The higher timestamp wins.</p>
+            </div>
+            <div class="inner">
+              <table>
+                <thead><tr><th>Write</th><th>Timestamp</th><th>Outcome</th></tr></thead>
+                <tbody id="lww-rows"></tbody>
+              </table>
+              <div class="verdict is-bad" id="lww-verdict"></div>
+              <div class="agree" id="lww-agree"></div>
+            </div>
+          </div>
 
-  <hr class="rule">
+          <div class="side">
+            <div class="head">
+              <h3>Ordered by counting</h3>
+              <p>No clock is consulted. Each node derives the order from the writes themselves.</p>
+            </div>
+            <div class="inner">
+              <table>
+                <thead><tr><th>Write</th><th>Timestamp</th><th>Outcome</th></tr></thead>
+                <tbody id="dse-rows"></tbody>
+              </table>
+              <div class="verdict is-ok" id="dse-verdict"></div>
+              <div class="agree" id="dse-agree"></div>
+            </div>
+          </div>
 
-  <h2>Why this matters</h2>
-  <p>Last-write-wins by wall clock is the default in widely deployed systems &mdash; Cassandra,
-  DynamoDB global tables, and peer-to-peer document stores among them. When two clocks disagree,
-  the write from the machine that is further ahead survives, and the other is discarded with
-  <b>no error raised anywhere</b>. The cluster is consistent, available, and quietly wrong.</p>
+        </div>
 
-  <p>The usual defence is to make clocks agree more tightly: NTP, PTP, GPS receivers, atomic
-  clocks. Google's Spanner uses satellite time and atomic clocks per datacenter, then waits out
-  the residual uncertainty before committing. That narrows the window. It does not remove it,
-  and it costs hardware.</p>
+        <p class="note">
+          This page demonstrates a <em>property</em> — that the winner can be made independent of
+          every clock in the system — not a mechanism. The derivation the engine actually uses is
+          not shown here.
+        </p>
+      </section>
 
-  <p>The alternative is to stop asking what time it is. If order is generated rather than
-  measured, clock skew has nothing to corrupt &mdash; there is no timestamp to compare, so
-  there is no wrong answer to converge on.</p>
+      <section class="panel">
+        <h2>Why this matters</h2>
+        <p>
+          Last-write-wins by wall clock is the default in widely deployed systems: Cassandra,
+          DynamoDB global tables, and peer-to-peer document stores among them. When two clocks
+          disagree, the write from the machine that is further ahead survives and the other is
+          discarded — with <strong style="color:var(--text)">no error raised anywhere</strong>.
+          The cluster stays consistent, stays available, and is quietly wrong.
+        </p>
+        <p>
+          The usual defence is to make the clocks agree more tightly: NTP, then PTP, then GPS
+          receivers, then atomic clocks. Google's Spanner uses satellite time and atomic clocks in
+          every datacenter, then deliberately waits out the residual uncertainty before committing.
+          That narrows the window. It does not close it, and it costs hardware.
+        </p>
+        <p>
+          The other option is to stop asking what time it is. If order is <em>generated</em> rather
+          than <em>measured</em>, clock skew has nothing to corrupt: there is no timestamp to
+          compare, so there is no wrong answer to agree on.
+        </p>
+      </section>
 
-  <footer>
-    Vortex DSE &mdash; deterministic ordering, machine-checked exactly-once (TLA<sup>+</sup>/TLAPS),
-    measured at the 2&times;RTT floor across 13 countries.
-    <a href="https://vasilisnasopoulos.github.io/">Proofs, specification and testnet &rarr;</a>
-  </footer>
-
-</div>
+      <footer>
+        Vortex DSE — deterministic ordering, machine-checked exactly-once (TLA⁺/TLAPS),
+        measured at the 2×RTT floor across 13 countries.
+        <a href="/">Proofs, specification and live testnet →</a>
+      </footer>
+    </main>
 
 <script>
 (() => {
@@ -159,39 +174,34 @@
 
   // Two writes to the same key, issued at the same true instant.
   const WRITES = [
-    { id:"A", node:0, value:"seat 14A → Ada",   order:1 },
-    { id:"B", node:2, value:"seat 14A → Grace", order:0 }
+    { id: "A", node: 0, value: "seat 14A → Ada",   rank: 1 },
+    { id: "B", node: 2, value: "seat 14A → Grace", rank: 0 }
   ];
 
   const NODES = [
-    { name:"frankfurt", skew: 0 },
-    { name:"tokyo",     skew: 0 },
-    { name:"los-angeles", skew: 0 }
+    { name: "frankfurt",   skew: 0 },
+    { name: "tokyo",       skew: 0 },
+    { name: "los-angeles", skew: 0 }
   ];
 
-  const TRUE_T = 1000; // notional true instant, ms
-
+  const TRUE_T = 1000;                 // the notional true instant, ms
   const $ = id => document.getElementById(id);
 
-  function fmtSkew(ms){
-    if (ms === 0) return "on true time";
-    const s = (ms/1000).toFixed(1);
-    return (ms > 0 ? "+" : "") + s + "s " + (ms > 0 ? "ahead" : "behind");
-  }
+  const fmtSkew = ms =>
+    ms === 0 ? "on true time"
+             : (ms > 0 ? "+" : "") + (ms / 1000).toFixed(1) + "s " + (ms > 0 ? "ahead" : "behind");
 
-  function buildClocks(){
+  function buildClocks() {
     const host = $("clocks");
-    host.innerHTML = "";
     NODES.forEach((n, i) => {
       const el = document.createElement("div");
       el.className = "clock";
       el.innerHTML =
         '<div class="name">' + n.name + '</div>' +
         '<div class="skew" id="skew-' + i + '">' + fmtSkew(n.skew) + '</div>' +
-        '<input type="range" min="-4000" max="4000" step="100" value="' + n.skew +
-        '" aria-label="clock offset for ' + n.name + '">';
-      const range = el.querySelector("input");
-      range.addEventListener("input", e => {
+        '<input type="range" min="-4000" max="4000" step="100" value="0" ' +
+        'aria-label="clock offset for ' + n.name + '">';
+      el.querySelector("input").addEventListener("input", e => {
         NODES[i].skew = Number(e.target.value);
         $("skew-" + i).textContent = fmtSkew(NODES[i].skew);
         render();
@@ -200,82 +210,74 @@
     });
   }
 
-  // ---- Side 1: wall-clock last-write-wins -------------------------------
-  // Each write carries the stamp its own node's clock produced.
-  function lwwResult(){
-    const stamped = WRITES.map(w => ({ ...w, stamp: TRUE_T + NODES[w.node].skew }));
-    let winner = stamped[0];
-    for (const w of stamped) {
-      // strictly greater wins; exact ties fall back to write id for determinism
-      if (w.stamp > winner.stamp || (w.stamp === winner.stamp && w.id > winner.id)) winner = w;
-    }
-    return { stamped, winner };
+  const stampAll = () =>
+    WRITES.map(w => ({ ...w, stamp: TRUE_T + NODES[w.node].skew }));
+
+  // Side 1: the winner is whichever machine's clock read latest.
+  function byWallClock() {
+    const rows = stampAll();
+    const winner = rows.reduce((a, b) =>
+      (b.stamp > a.stamp || (b.stamp === a.stamp && b.id > a.id)) ? b : a);
+    return { rows, winner };
   }
 
-  // ---- Side 2: order generated, not measured ----------------------------
-  // The winner is a function of the writes alone. No clock is consulted, so
-  // nothing here reads NODES[].skew. That is the whole point.
-  function countedResult(){
-    const stamped = WRITES.map(w => ({ ...w, stamp: TRUE_T + NODES[w.node].skew }));
-    const winner = stamped.reduce((a, b) => (a.order <= b.order ? a : b));
-    return { stamped, winner };
+  // Side 2: the winner is a function of the writes alone. Note that nothing
+  // in here reads NODES[i].skew — that is the entire point of the demo.
+  function byCounting() {
+    const rows = stampAll();
+    const winner = rows.reduce((a, b) => (a.rank <= b.rank ? a : b));
+    return { rows, winner };
   }
 
-  function rowsFor(res, showStamp){
-    return res.stamped.map(w => {
-      const won = w.id === res.winner.id;
-      return '<tr>' +
-        '<td><b>' + w.id + '</b> <span class="n">' + w.value + '</span></td>' +
-        '<td class="n">' + (showStamp ? (w.stamp/1000).toFixed(1) + 's' : '—') + '</td>' +
-        '<td class="' + (won ? 'win' : 'lost strike') + '">' +
-          (won ? 'kept' : 'discarded') +
-        '</td></tr>';
-    }).join("");
-  }
+  const renderRows = res => res.rows.map(w => {
+    const kept = w.id === res.winner.id;
+    return '<tr>' +
+      '<td><span class="k">' + w.id + '</span> · ' + w.value + '</td>' +
+      '<td>' + (w.stamp / 1000).toFixed(1) + 's</td>' +
+      '<td class="' + (kept ? 'kept' : 'gone') + '">' + (kept ? 'kept' : 'discarded') + '</td>' +
+    '</tr>';
+  }).join("");
 
-  let lastLwwWinner = null;
+  let previousWinner = null;
   let flips = 0;
 
-  function render(){
-    const lww = lwwResult();
-    const dse = countedResult();
+  function render() {
+    const lww = byWallClock();
+    const dse = byCounting();
 
-    $("lww-rows").innerHTML = rowsFor(lww, true);
-    $("dse-rows").innerHTML = rowsFor(dse, true);
+    $("lww-rows").innerHTML = renderRows(lww);
+    $("dse-rows").innerHTML = renderRows(dse);
 
-    // Did dragging a clock change who survives?
-    if (lastLwwWinner !== null && lastLwwWinner !== lww.winner.id) flips++;
-    lastLwwWinner = lww.winner.id;
+    if (previousWinner !== null && previousWinner !== lww.winner.id) flips++;
+    previousWinner = lww.winner.id;
 
-    const loser = lww.stamped.find(w => w.id !== lww.winner.id);
+    const loser = lww.rows.find(w => w.id !== lww.winner.id);
     $("lww-verdict").innerHTML =
-      '<b>' + loser.value + '</b> was discarded because <b>' +
-      NODES[lww.winner.node].name + '</b>’s clock read later — not because it happened later. ' +
-      'No error was raised.' +
+      '<strong>' + loser.value + '</strong> was discarded because <strong>' +
+      NODES[lww.winner.node].name + '</strong>’s clock read later — not because it ' +
+      'happened later.' +
       (flips > 0
-        ? ' The surviving write has already changed <span class="counter">' + flips +
-          '</span> time' + (flips === 1 ? '' : 's') + ' as you dragged.'
+        ? ' The surviving write has changed <span class="flips">' + flips + '</span> time' +
+          (flips === 1 ? '' : 's') + ' since you started dragging.'
         : '');
 
     $("dse-verdict").innerHTML =
-      '<b>' + dse.winner.value + '</b> wins on every node, and keeps winning no matter ' +
-      'where you drag the clocks. The order was generated from the writes, so there is ' +
-      'no timestamp for skew to corrupt.';
+      '<strong>' + dse.winner.value + '</strong> wins on every node, and goes on winning ' +
+      'wherever you drag the clocks. The order came from the writes, so there is no ' +
+      'timestamp for skew to corrupt.';
 
-    // Do all three nodes agree on the outcome?
-    // Wall-clock side: every node compares the same stamps, so they agree with each
-    // other -- and are uniformly wrong. Worth stating plainly.
     $("lww-agree").innerHTML =
-      'All three nodes agree: <span class="same">yes</span>. ' +
-      'All three are wrong together — agreement is not correctness.';
+      'All three nodes agree: <b>yes</b> — and all three are wrong together. ' +
+      'Agreement is not correctness.';
+
     $("dse-agree").innerHTML =
-      'All three nodes agree: <span class="same">yes</span>, independently, ' +
-      'with no message exchanged to decide it.';
+      'All three nodes agree: <b>yes</b> — independently, with no message exchanged ' +
+      'to decide it.';
   }
 
   buildClocks();
   render();
 })();
 </script>
-</body>
+  </body>
 </html>
