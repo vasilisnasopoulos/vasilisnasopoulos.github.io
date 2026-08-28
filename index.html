@@ -151,6 +151,33 @@
         </ul>
       </section>
 
+      <section class="panel">
+        <h2>One claim that does not rest on me</h2>
+        <p>
+          Everything above is my own work, checked with my own tools. This is the
+          exception. On 25 August I published a small property under CC BY 4.0. Within
+          three days, three independent engineers had taken it further than I had.
+        </p>
+        <ul class="plain">
+          <li><span class="tick">✓</span> <strong>Made executable</strong> — turned into a crash benchmark against LangGraph, where it found failures.</li>
+          <li><span class="tick">✓</span> <strong>Reproduced</strong> — by a second person, on different hardware and a different checkpoint backend.</li>
+          <li><span class="tick">✓</span> <strong>Extended</strong> — by a third, to LangGraph, Temporal and DBOS, reading the side-effect count from a hash-chained ledger in a separate process, so the runtime under test cannot report its own score.</li>
+        </ul>
+        <p>
+          The property states its own limit: at-most-once needs the <em>receiver</em> to
+          honour the identity, because the effect and its durable record live in two
+          different systems. That declared limit is why the third harness measures the
+          receiver instead of assuming it. The work is theirs and public, in
+          <a href="https://github.com/langchain-ai/langgraph/issues/8039">langgraph#8039</a>.
+        </p>
+        <div class="grid">
+          <a class="card" href="https://github.com/vasilisnasopoulos/recovery-safety-property">
+            <strong>Recovery safety (RS1–RS3) →</strong>
+            <p>The property, the executable assertion, and the limit it declares about itself. CC BY 4.0 — reusable, including commercially.</p>
+          </a>
+        </div>
+      </section>
+
 
       <section class="live">
         <div class="live-head">
