@@ -60,16 +60,6 @@
       ul.plain li:first-child { border-top: 0; }
       .tick { color: var(--ok); font-weight: 600; }
       footer { margin-top: 54px; padding-top: 22px; border-top: 1px solid var(--border); font-size: .9rem; color: var(--muted); }
-      .live { margin-top: 42px; }
-      .live-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-      .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ok); display: inline-block; }
-      .dot.stale { background: #d0a215; }
-      .dot.off { background: #c2564f; }
-      .live-meta { font-size: .82rem; color: var(--muted); }
-      .live-grid { display: grid; gap: 12px; margin-top: 16px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-      .live-cell { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: var(--panel); }
-      .live-cell b { display: block; font-size: 1.3rem; color: var(--text); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-      .live-cell span { font-size: .8rem; color: var(--muted); }
       .claim { border-left: 3px solid var(--accent); padding: 2px 0 2px 16px; margin: 18px 0; }
       .claim b { color: var(--text); display: block; margin-bottom: 4px; }
       .claim p { margin: 0; font-size: .95rem; }
@@ -180,78 +170,6 @@
       </section>
 
 
-      <section class="live">
-        <div class="live-head">
-          <h2><span class="dot" id="lv-dot"></span> Testnet</h2>
-          <span class="live-meta" id="lv-meta">loading…</span>
-        </div>
-        <p>
-          Three nodes in Frankfurt, Tokyo and Los Angeles, running continuously.
-          The figures below are what those nodes measure and report. Two of them
-          are worth explaining, because the numbers mean nothing without the
-          problem they answer.
-        </p>
-
-        <div class="claim">
-          <b>Anyone can claim to run nodes on three continents. Nobody can prove it.</b>
-          <p>
-            These nodes time the distance between themselves. Light takes what it
-            takes: 244&nbsp;ms between Frankfurt and Tokyo cannot be faked downward.
-            Three copies on one machine would answer each other in microseconds,
-            and the system flags any pair that close as sharing a host. None are
-            flagged here.
-          </p>
-        </div>
-
-
-        <p class="live-meta">
-          This build is a production candidate, not the engine the published
-          results were measured on. Those come from bounded runs of the core:
-          the most recent, on these same three machines, converged on chain hash
-          <code>c756379c16c8d977</code> — byte-identical to the single-machine
-          reference, with no shared clock and 241&nbsp;ms between the furthest
-          pair.
-        </p>
-        <div class="live-grid" id="lv-grid"></div>
-        <p class="live-meta" id="lv-note"></p>
-      </section>
-
-
-      <section class="live">
-        <div class="live-head">
-          <h2>Beta</h2>
-          <span class="live-meta">by invitation</span>
-        </div>
-        <p>
-          The network above has been running unattended. A small number of
-          outside nodes will be invited to join it. Participants are chosen
-          rather than admitted on request, and the list is kept short on
-          purpose.
-        </p>
-        <p>
-          What you would be doing: running one node, on your own machine,
-          against those three. It registers with the bootstrap, discovers the
-          others, and joins &mdash; one token, no files edited by hand.
-        </p>
-
-        <div class="claim">
-          <b>What this is not.</b>
-          <p>
-            There is no SLA and no uptime guarantee, and the engine on those
-            nodes is a production candidate rather than a released product.
-            The bootstrap does not speak TLS yet either, which is one of the
-            things we sort out before a node of yours joins.
-          </p>
-        </div>
-
-        <p class="live-meta">
-          Nothing is self-serve and no credential travels before we have spoken.
-          If you would like to be considered, say what you would run and where.
-          Where it is a fit, we arrange the join together &mdash;
-          <a href="mailto:vasilis_nasopoulos@hotmail.com?subject=Vortex%20testnet%20beta">vasilis_nasopoulos@hotmail.com</a>.
-        </p>
-      </section>
-
       <footer>
         <p>
           Public artifacts are Apache-2.0; the whitepaper is CC BY-NC-ND 4.0.
@@ -264,53 +182,5 @@
       </footer>
     </main>
 
-    <script>
-      (async function () {
-        const dot  = document.getElementById('lv-dot');
-        const meta = document.getElementById('lv-meta');
-        const grid = document.getElementById('lv-grid');
-        const note = document.getElementById('lv-note');
-        const cell = (v, l) => `<div class="live-cell"><b>${v}</b><span>${l}</span></div>`;
-        const num  = n => Number(n).toLocaleString('en-US');
-
-        try {
-          const r = await fetch('https://raw.githubusercontent.com/vasilisnasopoulos/vortex-testnet-status/main/testnet.json?t=' + Date.now(), { cache: 'no-store' });
-          if (!r.ok) throw new Error(r.status);
-          const d = await r.json();
-
-          const ageMin = Math.round((Date.now() - Date.parse(d.generated)) / 60000);
-          dot.className = 'dot' + (ageMin > 20 ? ' off' : ageMin > 10 ? ' stale' : '');
-          meta.textContent = ageMin < 1 ? 'updated just now'
-                           : `updated ${ageMin} minute${ageMin === 1 ? '' : 's'} ago`;
-
-          const up = d.uptime_seconds || 0;
-          const upTxt = up >= 86400 ? Math.floor(up / 86400) + 'd ' + Math.floor(up % 86400 / 3600) + 'h'
-                      : up >= 3600  ? Math.floor(up / 3600) + 'h ' + Math.floor(up % 3600 / 60) + 'm'
-                      : Math.floor(up / 60) + 'm';
-
-          const t = d.rtt_ms || {};
-          const rtt = [t.fra_nrt, t.fra_lax, t.nrt_lax]
-                        .map(x => Math.round(Number(x))).filter(x => x > 0);
-
-          grid.innerHTML =
-              cell(num(d.slot), 'slots committed')
-            + cell(num(d.admitted), 'transactions admitted')
-            + cell(d.peers_heard + ' / ' + (d.nodes - 1), 'peers heard, this slot')
-            + cell(rtt.length ? rtt.join(' · ') + ' ms' : '—', 'measured RTT between sites')
-            + cell(d.colocation_flags === 0 ? 'none' : num(d.colocation_flags),
-                   'nodes flagged as co-located')
-            + cell(upTxt, 'uptime');
-
-          note.textContent =
-            'Round-trip times are measured by the nodes themselves, not declared. '
-          + 'Machines sharing a host would answer each other in microseconds and be '
-          + 'flagged as co-located; none are.';
-        } catch (e) {
-          dot.className = 'dot off';
-          meta.textContent = 'status unavailable';
-          note.textContent = 'The published snapshot could not be read. The testnet may be down, or the publisher may have stopped.';
-        }
-      })();
-    </script>
   </body>
 </html>
