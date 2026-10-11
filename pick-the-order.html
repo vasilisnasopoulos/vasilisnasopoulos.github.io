@@ -98,7 +98,7 @@
           </tbody>
         </table>
         <p class="same">
-          <b>Same set in, same ledger out</b> — with no sequencer, no quorum, and no node asking
+          <b>Same set in, same ledger out</b> — with no sequencer and no node asking
           another node what order to use. The permutation is a Fisher–Yates shuffle of the send
           order; the set of transactions is untouched.
         </p>
@@ -132,8 +132,9 @@
         </p>
         <p>
           If the final state is a function of the <em>set</em> of transactions rather than the
-          order they showed up in, that whole problem stops applying. Nothing has to be agreed,
-          because there is nothing left to disagree about.
+          order they showed up in, that whole problem stops applying. Nothing has to be agreed
+          about the order, because there is nothing left to disagree about. (What still needs
+          agreement is silence: whether a node that sent nothing was absent or just late.)
         </p>
         <p>
           A related demonstration you can run yourself, with no numbers to send anyone:
@@ -143,7 +144,7 @@
 
       <footer>
         Vortex DSE — deterministic ordering, machine-checked exactly-once (TLA⁺/TLAPS),
-        measured at 2×RTT across 13 countries (one round trip is physics, the second is this protocol's loss recovery).
+        one ledger hash across 13 nodes in 13 countries.
         <a href="/">Proofs and specification →</a>
       </footer>
     </main>

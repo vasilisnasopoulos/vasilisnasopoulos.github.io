@@ -72,8 +72,9 @@
         <p class="eyebrow">Formal methods · TLA⁺ · TLAPS · distributed consensus</p>
         <h1>Vasilis Nasopoulos</h1>
         <p class="lede">
-          I work on <strong>Vortex DSE</strong>, a deterministic consensus protocol that reaches
-          finality without leader election, voting, or gossip. The specifications and safety
+          I work on <strong>Vortex DSE</strong>, a leaderless protocol that runs
+          consensus only where it is provably unavoidable &mdash; on silence &mdash; and exactly as much
+          as needed. Order and winner are computed by every node from the content, with no vote. The specifications and safety
           proofs below are public and machine-checked; the engine itself is not.
         </p>
 
@@ -85,7 +86,7 @@
 
         <div class="stats">
           <div class="stat"><b>325</b><span>TLAPS obligations discharged</span></div>
-          <div class="stat"><b>2×RTT</b><span>latency bound, no coordination</span></div>
+          <div class="stat"><b>τ</b><span>least coordination, proved: only on silence</span></div>
           <div class="stat"><b>13 / 13</b><span>nodes / countries, one state hash</span></div>
         </div>
       </header>
@@ -137,7 +138,8 @@
           <li><span class="tick">✓</span> <strong>Exactly-once admission</strong> — 131 obligations, TLAPS, unbounded.</li>
           <li><span class="tick">✓</span> <strong>Type safety &amp; no-future admission</strong> — 194 obligations, TLAPS, unbounded.</li>
           <li><span class="tick">✓</span> <strong>Per-slot agreement</strong> — TLC and Apalache, two independent checkers, bounded; plus a Lean 4 inductive proof.</li>
-          <li><span class="tick">✓</span> <strong>Bounded latency</strong> — proved for the core, with two diameter-induction steps left explicitly <code>OMITTED</code> rather than silently open.</li>
+          <li><span class="tick">✓</span> <strong>Where coordination goes (the Silence Theorem)</strong> — the only coordination a decision needs is agreement on silence, exactly τ of it; TLAPS, public in <a href="https://github.com/vasilisnasopoulos/where-coordination-goes">where-coordination-goes</a>.</li>
+          <li><span class="tick">·</span> <strong>Bounded latency</strong> — stated for the core in flooding rounds, not seconds; the proof body is <code>OMITTED</code>, so it is not a machine-checked result.</li>
         </ul>
       </section>
 
@@ -173,7 +175,7 @@
       <footer>
         <p>
           Public artifacts are Apache-2.0; the whitepaper is CC BY-NC-ND 4.0.
-          The production engine and the underlying derivations remain proprietary.
+          The engine itself is my own and is not published.
         </p>
         <p>
           <a href="https://github.com/vasilisnasopoulos">GitHub</a> ·
